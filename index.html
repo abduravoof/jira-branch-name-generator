@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jira Branch Name Creator</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Jira Branch Name Creator</h1>
+        <form id="slugForm">
+            <div class="form-group">
+                <label for="jiraNumber">Jira Number:</label>
+                <input type="text" class="form-control" id="jiraNumber" required>
+            </div>
+
+            <div class="form-group">
+                <label for="branchType">Branch Type:</label>
+                <select class="form-control" id="branchType" name="branchType" required>
+                    <option value="">Select Branch Type</option>
+                    <option value="feature">Feature</option>
+                    <option value="bugfix">Bugfix</option>
+                    <option value="hotfix">Hotfix</option>
+                    <option value="release">Release</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="jiraTitle">Jira Title:</label>
+                <input type="text" class="form-control" id="jiraTitle" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="separator">Choose Separator:</label>
+                <select class="form-control" id="separator" name="separator" required>
+                    <option value="-">Hyphen</option>
+                    <option value="_">Underscore</option>
+                </select>
+            </div>
+            
+            <button type="button" class="btn btn-primary" onclick="generateSlug()">Generate Slug</button>
+            <button type="button" class="btn btn-danger" onclick="resetForm()">Reset</button>
+        </form>
+        
+        <div id="slugResult" class="mt-3"></div>
+        <button type="button" class="btn btn-secondary mt-3" id="copyButton" style="display: none;" onclick="copyToClipboard()">Copy to Clipboard</button>
+    </div>
+    
+    <!-- Include Bootstrap JS (optional) -->
+
+
+    <script>
+        function createSlug(jiraNumber, branchType, jiraTitle, separator) {
+            const lowercaseTitle = jiraTitle.toLowerCase();
+            let slug = branchType + '/' + jiraNumber + separator + lowercaseTitle
+                .replace(/\s+/g, separator)
+                .replace(/[^\w-]+/g, '');
+            
+            // Remove the trailing separator if it exists
+            if (slug.endsWith(separator)) {
+                slug = slug.slice(0, -separator.length);
+            }
+            
+            return slug;
+        }
+
+        function generateSlug() {
+            const jiraNumber = document.getElementById("jiraNumber").value;
+            const branchType = document.getElementById("branchType").value;
+            const jiraTitle = document.getElementById("jiraTitle").value;
+            const separator = document.getElementById("separator").value;
+            const slugResult = document.getElementById("slugResult");
+            const copyButton = document.getElementById("copyButton");
+
+            if (jiraNumber && branchType && jiraTitle && separator) {
+                const slug = createSlug(jiraNumber, branchType, jiraTitle, separator);
+                slugResult.innerHTML = "Slugified String: " + slug;
+                // Store the generated slug in a data attribute for copying
+                slugResult.setAttribute('data-slug', slug);
+                // Show the "Copy to Clipboard" button
+                copyButton.style.display = 'inline-block';
+            } else {
+                alert('Please fill in all fields.');
+                slugResult.innerHTML = '';
+                // Hide the "Copy to Clipboard" button if fields are not filled
+                copyButton.style.display = 'none';
+            }
+        }
+
+        function copyToClipboard() {
+            const slugResult = document.getElementById("slugResult");
+            const slug = slugResult.getAttribute('data-slug');
+
+            const tempInput = document.createElement('input');
+            document.body.appendChild(tempInput);
+            tempInput.value = slug;
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            alert('Copied to clipboard: ' + slug);
+        }
+
+        function resetForm() {
+            const slugResult = document.getElementById("slugResult");
+            const copyButton = document.getElementById("copyButton");
+            const jiraNumber = document.getElementById("jiraNumber");
+            const branchType = document.getElementById("branchType");
+            const jiraTitle = document.getElementById("jiraTitle");
+            const separator = document.getElementById("separator");
+
+            slugResult.innerHTML = '';
+            copyButton.style.display = 'none';
+            jiraNumber.value = '';
+            branchType.value = '';
+            jiraTitle.value = '';
+            separator.value = '-';
+        }
+    </script>
+</body>
+</html>
